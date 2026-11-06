@@ -18,7 +18,9 @@
 
     // Seletores para otimização de performance
     const PERFORMANCE_TWEAKS = {
-        disableAnimations: true,
+        // Desligado: a regra universal deixava a thread principal 100% ocupada
+        // recalculando estilos e atrasava o envio e o recebimento de mensagens
+        disableAnimations: false,
         reduceBgProcessing: true
     };
 
@@ -39,6 +41,24 @@
                 // Seletor inválido, ignorar silenciosamente
             }
         });
+        hideDownloadBanner();
+    }
+
+    /**
+     * Esconde o aviso "Baixar o WhatsApp para Windows" no fim da lista de
+     * conversas. As classes dele mudam com frequência, então ele é achado
+     * pelo texto, só entre os blocos pequenos de #side (nunca a lista em si).
+     */
+    function hideDownloadBanner() {
+        const side = document.getElementById('side');
+        if (!side) return;
+        for (const child of side.children) {
+            if (child.style.display === 'none') continue;
+            if (child.querySelector('[role="grid"], [role="listbox"]')) continue;
+            if (/WhatsApp (para|for) Windows/i.test(child.textContent)) {
+                child.style.display = 'none';
+            }
+        }
     }
 
     /**

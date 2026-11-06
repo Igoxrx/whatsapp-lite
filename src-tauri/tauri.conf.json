@@ -58,10 +58,9 @@
     },
     "windows": [
       {
+        "create": false,
         "height": 720,
         "width": 1280,
-        "minHeight": 500,
-        "minWidth": 800,
         "fullscreen": false,
         "resizable": true,
         "center": true,
