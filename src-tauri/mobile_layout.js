@@ -15,9 +15,58 @@
     // Permite reinjetar o script sem duplicar o botão
     if (window.__wlMobile) window.__wlMobile.destroy();
 
+    // Abaixo desta largura, a barra lateral (conversas, status, canais...) vai para baixo
+    const NARROW_WIDTH = 640;
+    const BOTTOM_NAV_HEIGHT = 56;
+
     let timer = null;
 
     const CSS = `
+        @media (max-width: ${NARROW_WIDTH}px) {
+            html.wl-list [data-wl="nav"] {
+                position: absolute !important;
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: auto !important;
+                height: ${BOTTOM_NAV_HEIGHT}px !important;
+                padding: 8px 12px !important;
+                z-index: 5;
+            }
+            html.wl-list [data-wl="nav"] > div {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            html.wl-list [data-wl="nav"] > div > div {
+                display: flex !important;
+                flex: 0 0 auto !important;
+                width: auto !important;
+                height: auto !important;
+            }
+            html.wl-list [data-wl="nav"] > div > div > div {
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 4px;
+                height: auto !important;
+            }
+            html.wl-list [data-wl="nav"] hr { display: none !important; }
+            html.wl-list [data-wl="col"] {
+                margin-left: 0 !important;
+                height: calc(100% - ${BOTTOM_NAV_HEIGHT}px) !important;
+            }
+            html.wl-list [data-wl="layer"] {
+                left: 0 !important;
+                right: 0 !important;
+                width: auto !important;
+                bottom: ${BOTTOM_NAV_HEIGHT}px !important;
+                height: auto !important;
+            }
+        }
+
         html.wl-list [data-wl="col"] {
             flex: 1 1 auto !important;
             width: auto !important;
@@ -117,7 +166,14 @@
             setMode(null);
             return;
         }
-        tag(column.parentElement.querySelector(':scope > header'), 'nav');
+        const nav = column.parentElement.querySelector(':scope > header');
+        tag(nav, 'nav');
+        // Camadas recuadas para dar lugar à barra lateral (painéis que abrem
+        // por cima da lista); com a barra embaixo, o recuo é removido
+        for (const layer of column.parentElement.children) {
+            const style = getComputedStyle(layer);
+            if (style.position === 'absolute' && parseFloat(style.left) > 0) tag(layer, 'layer');
+        }
         tag(column, 'col');
         tag(column.nextElementSibling, 'main');
         // As camadas só podem ser medidas com a lista visível
