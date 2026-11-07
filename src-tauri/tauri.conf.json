@@ -49,10 +49,6 @@
     }
   },
   "app": {
-    "trayIcon": {
-      "iconPath": "icons/128x128@2x.png",
-      "title": "WhatsApp Lite"
-    },
     "security": {
       "csp": "default-src 'self' https://web.whatsapp.com https://*.whatsapp.com https://*.whatsapp.net wss://*.whatsapp.com wss://*.web.whatsapp.com; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://web.whatsapp.com; style-src 'self' 'unsafe-inline' https://web.whatsapp.com; connect-src 'self' https://*.whatsapp.com https://*.whatsapp.net wss://*.whatsapp.com wss://*.web.whatsapp.com https://web.whatsapp.com;"
     },
