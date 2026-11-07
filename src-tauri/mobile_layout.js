@@ -1,21 +1,12 @@
-/**
- * WhatsApp Lite Desktop - Layout estilo celular
- *
- * Sem conversa aberta, a lista (com a barra de conversas, status, canais e
- * comunidades) ocupa a janela toda. Ao abrir uma conversa, só o chat aparece,
- * com um botão de voltar no canto superior esquerdo.
- */
-
 (function() {
     'use strict';
 
     const STYLE_ID = 'wl-mobile-layout';
     const BACK_ID = 'wl-back-button';
 
-    // Permite reinjetar o script sem duplicar o botão
     if (window.__wlMobile) window.__wlMobile.destroy();
 
-    // Abaixo desta largura, a barra lateral (conversas, status, canais...) vai para baixo
+    // abaixo disso a barra lateral vai para baixo
     const NARROW_WIDTH = 640;
     const BOTTOM_NAV_HEIGHT = 56;
 
@@ -103,10 +94,6 @@
         html.wl-chat #${BACK_ID} { display: flex; }
     `;
 
-    /**
-     * Encontra a coluna que contém a lista de conversas: o filho do layout
-     * principal (.two) que contém #side.
-     */
     function findColumn() {
         let el = document.getElementById('side');
         if (!el) return null;
@@ -117,10 +104,7 @@
         return el.parentElement ? el : null;
     }
 
-    /**
-     * Pares [lista, painel] que seguem o mesmo layout: a coluna principal e
-     * as camadas sobrepostas do WhatsApp (painéis, transições).
-     */
+    // o WhatsApp tem camadas sobrepostas com o mesmo layout lista/painel
     function findPairs(column) {
         const pairs = [[column, column.nextElementSibling]];
         const left = column.offsetLeft;
@@ -138,7 +122,6 @@
         return pairs;
     }
 
-    // Só escreve quando muda: cada escrita faz o navegador recalcular a tela
     function tag(el, value) {
         if (el && el.getAttribute('data-wl') !== value) el.setAttribute('data-wl', value);
     }
@@ -151,10 +134,6 @@
         }
     }
 
-    /**
-     * Há algo aberto no painel da direita (conversa, canal etc.) quando ele
-     * tem conteúdo e não é a tela inicial vazia do WhatsApp.
-     */
     function paneHasContent(pane) {
         if (!pane || !pane.firstElementChild) return false;
         return !pane.querySelector('[data-testid="intro-panel"]');
@@ -168,15 +147,13 @@
         }
         const nav = column.parentElement.querySelector(':scope > header');
         tag(nav, 'nav');
-        // Camadas recuadas para dar lugar à barra lateral (painéis que abrem
-        // por cima da lista); com a barra embaixo, o recuo é removido
         for (const layer of column.parentElement.children) {
             const style = getComputedStyle(layer);
             if (style.position === 'absolute' && parseFloat(style.left) > 0) tag(layer, 'layer');
         }
         tag(column, 'col');
         tag(column.nextElementSibling, 'main');
-        // As camadas só podem ser medidas com a lista visível
+        // com a lista escondida as medidas vêm zeradas
         if (column.offsetWidth > 0) {
             for (const [list, pane] of findPairs(column)) {
                 tag(list, 'col');
@@ -186,13 +163,18 @@
         setMode(paneHasContent(column.nextElementSibling) ? 'wl-chat' : 'wl-list');
     }
 
-    /**
-     * Volta para a lista: o WhatsApp fecha a conversa aberta com Esc.
-     */
+    // Esc fecha a conversa no WhatsApp
     function goBack() {
         const init = { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true, cancelable: true };
         (document.activeElement || document.body).dispatchEvent(new KeyboardEvent('keydown', init));
         setTimeout(refresh, 100);
+    }
+
+    // botão lateral "voltar" do mouse; sem o preventDefault o WebView2 volta o histórico
+    function onMouseBack(e) {
+        if (e.button !== 3) return;
+        e.preventDefault();
+        if (e.type === 'mouseup') goBack();
     }
 
     function createBackButton() {
@@ -211,6 +193,8 @@
         style.textContent = CSS;
         document.head.appendChild(style);
         createBackButton();
+        window.addEventListener('mousedown', onMouseBack, true);
+        window.addEventListener('mouseup', onMouseBack, true);
         refresh();
         timer = setInterval(refresh, 300);
     }
@@ -218,6 +202,8 @@
     window.__wlMobile = {
         destroy() {
             clearInterval(timer);
+            window.removeEventListener('mousedown', onMouseBack, true);
+            window.removeEventListener('mouseup', onMouseBack, true);
             setMode(null);
             document.querySelectorAll('[data-wl]').forEach(el => el.removeAttribute('data-wl'));
             [STYLE_ID, BACK_ID].forEach(id => {

@@ -1,25 +1,12 @@
-/**
- * WhatsApp Lite Desktop - Chat compacto
- *
- * Reduz as margens laterais das mensagens e deixa os balões ocuparem
- * mais da largura do chat, aproveitando melhor o espaço da janela.
- */
-
 (function() {
     'use strict';
 
     const STYLE_ID = 'wl-compact-chat';
 
-    // Margem lateral das linhas de mensagem (o WhatsApp usa 63px)
-    const ROW_PADDING = '8px';
+    const ROW_PADDING = '8px'; // original: 63px
+    const BUBBLE_MAX_WIDTH = '95%'; // original: 65% a 95%
 
-    // Largura máxima dos balões (o WhatsApp usa 65% a 95% conforme a janela)
-    const BUBBLE_MAX_WIDTH = '95%';
-
-    // .two é o layout principal, com largura mínima de 748px que impede o
-    // chat de encolher em janelas estreitas.
-    // Classes atômicas do WhatsApp Web: cada uma corresponde a uma única
-    // declaração CSS, então só mudam se o WhatsApp mudar esses valores
+    // .two vem com min-width: 748px
     const CSS = `
         .two { min-width: 0 !important; }
         #main .x1wxbj4f { padding-inline-start: ${ROW_PADDING} !important; }

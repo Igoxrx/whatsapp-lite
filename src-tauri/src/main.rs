@@ -1,17 +1,3 @@
-//! # WhatsApp Lite Desktop
-//!
-//! Uma versão leve do WhatsApp Desktop feita em Rust usando Tauri.
-//!
-//! ## Motivação
-//! O WhatsApp Desktop oficial baseado em Electron consome recursos excessivos,
-//! chegando a usar 60% da GPU em algumas máquinas. Esta versão alternativa
-//! usa apenas ~1MB de RAM e praticamente zero GPU.
-//!
-//! ## Arquitetura
-//! - **Backend**: Rust + Tauri 2.0
-//! - **Frontend**: WebView nativo (WebView2 no Windows)
-//! - **Injeção de scripts**: Remove anúncios e elementos desnecessários
-
 #![cfg_attr(
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
@@ -26,32 +12,21 @@ use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent}
 use tauri::webview::NewWindowResponse;
 use tauri::{AppHandle, Manager, Url, WebviewWindowBuilder, WindowEvent};
 
-/// Preferências do usuário que valem entre execuções
 struct Settings {
-    /// Fechar a janela só a esconde; o app continua na bandeja do sistema
     run_in_background: AtomicBool,
 }
 
-/// Configuração padrão do proxy (pode ser sobrescrita via variável de ambiente)
 const DEFAULT_PROXY: Option<&str> = None;
 
-/// Script JavaScript para remover anúncios e otimizar a interface
 const AD_REMOVAL_SCRIPT: &str = include_str!("../remove_ad.js");
-
-/// Script JavaScript do layout estilo celular (lista ou conversa, com botão de voltar)
 const MOBILE_LAYOUT_SCRIPT: &str = include_str!("../mobile_layout.js");
-
-/// Única origem que pode mostrar notificações
-const WHATSAPP_ORIGIN: &str = "https://web.whatsapp.com/";
-
-/// Script JavaScript que reduz as margens das mensagens
 const COMPACT_CHAT_SCRIPT: &str = include_str!("../compact_chat.js");
 
-/// Configura argumentos adicionais do WebView2 para otimização
+const WHATSAPP_ORIGIN: &str = "https://web.whatsapp.com/";
+
 fn configure_webview_args() {
     let mut args = Vec::new();
 
-    // Configuração de proxy (opcional)
     if let Some(proxy) = env::var("WHATSAPP_PROXY")
         .ok()
         .or_else(|| DEFAULT_PROXY.map(String::from))
@@ -59,11 +34,10 @@ fn configure_webview_args() {
         args.push(format!("--proxy-server={}", proxy));
     }
 
-    // Otimizações de performance
     args.extend([
-        "--disable-gpu-compositing".to_string(),      // Reduz uso de GPU
-        "--disable-smooth-scrolling".to_string(),     // Menos overhead de animação
-        "--disable-features=msWebOOUI".to_string(),   // Remove UI desnecessária
+        "--disable-gpu-compositing".to_string(),
+        "--disable-smooth-scrolling".to_string(),
+        "--disable-features=msWebOOUI".to_string(),
     ]);
 
     if !args.is_empty() {
@@ -71,9 +45,8 @@ fn configure_webview_args() {
     }
 }
 
-/// Abre um link no navegador padrão do sistema
 fn open_in_browser(url: &Url) {
-    // Só http/https: uma mensagem não pode disparar outros esquemas no sistema
+    // links de mensagens: nada de file://, ms-settings: etc.
     if !matches!(url.scheme(), "http" | "https") {
         return;
     }
@@ -83,10 +56,8 @@ fn open_in_browser(url: &Url) {
     }
 }
 
-/// Permite que o WhatsApp Web mostre notificações de mensagens.
-///
-/// O Tauri só trata a permissão de área de transferência; sem isso o WebView2
-/// recusa o pedido de notificação na hora e guarda a recusa no perfil.
+// O Tauri só trata a permissão de clipboard, então o WebView2 negava as
+// notificações (e salvava a recusa no perfil).
 #[cfg(windows)]
 fn allow_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     use webview2_com::Microsoft::Web::WebView2::Win32::*;
@@ -100,7 +71,6 @@ fn allow_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()> {
             return;
         };
 
-        // Substitui uma recusa já salva no perfil (de versões anteriores do app)
         let profile = core
             .cast::<ICoreWebView2_13>()
             .and_then(|core| core.Profile())
@@ -145,7 +115,6 @@ fn allow_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     })
 }
 
-/// Arquivo onde as preferências ficam salvas
 fn settings_path(app: &AppHandle) -> Option<PathBuf> {
     app.path()
         .app_config_dir()
@@ -153,7 +122,6 @@ fn settings_path(app: &AppHandle) -> Option<PathBuf> {
         .map(|dir| dir.join("settings.json"))
 }
 
-/// Lê se o app deve rodar em segundo plano (padrão: sim)
 fn load_run_in_background(app: &AppHandle) -> bool {
     settings_path(app)
         .and_then(|path| fs::read_to_string(path).ok())
@@ -174,7 +142,6 @@ fn save_run_in_background(app: &AppHandle, value: bool) {
     }
 }
 
-/// Mostra e foca a janela principal (ex.: depois de escondida na bandeja)
 fn show_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.unminimize();
@@ -183,7 +150,6 @@ fn show_main_window(app: &AppHandle) {
     }
 }
 
-/// Ícone na bandeja do sistema com as opções Abrir, Rodar em segundo plano e Sair
 fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
     let run_in_background = app.state::<Settings>().run_in_background.load(Ordering::Relaxed);
 
@@ -206,7 +172,7 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "open" => show_main_window(app),
             "background" => {
-                // O item já foi marcado/desmarcado pelo clique
+                // o clique já alternou o check
                 let enabled = background.is_checked().unwrap_or(true);
                 app.state::<Settings>()
                     .run_in_background
@@ -235,7 +201,6 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Cria a janela principal com scripts de otimização
 fn setup_main_window(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let config = app
         .config()
@@ -244,7 +209,6 @@ fn setup_main_window(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>>
         .first()
         .ok_or("Falha ao obter configuração da janela principal")?;
 
-    // Scripts de inicialização rodam a cada carregamento da página
     let window = WebviewWindowBuilder::from_config(app, config)?
         .initialization_script(AD_REMOVAL_SCRIPT)
         .initialization_script(MOBILE_LAYOUT_SCRIPT)
@@ -262,11 +226,9 @@ fn setup_main_window(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>>
 }
 
 fn main() {
-    // Configura otimizações do WebView antes de iniciar
     configure_webview_args();
 
     tauri::Builder::default()
-        // Abrir o app de novo só mostra a janela que já está rodando
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             show_main_window(app);
         }))

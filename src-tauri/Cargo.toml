@@ -20,7 +20,7 @@ open = "5"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "2", features = ["tray-icon"] }
-# 2.4+ exige tauri 2.10; manter alinhado com a versão do tauri no Cargo.lock
+# 2.4+ pede tauri 2.10
 tauri-plugin-single-instance = "~2.3.6"
 
 [target.'cfg(windows)'.dependencies]
@@ -32,9 +32,8 @@ default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
 
 [profile.release]
-# Otimizações agressivas para menor tamanho e melhor performance
-lto = true           # Link-Time Optimization
-codegen-units = 1    # Melhor otimização
-panic = "abort"      # Menor binário
-strip = true         # Remove símbolos de debug
-opt-level = "z"      # Otimiza para tamanho
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = "z"
