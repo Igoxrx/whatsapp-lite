@@ -26,7 +26,7 @@ O app abre o WhatsApp Web oficial no WebView2 do Windows, em vez de embutir um n
 
 ## Instalação
 
-1. Baixe o `WhatsApp Lite_1.1.0_x64-setup.exe` em [Releases](https://github.com/Igoxrx/whatsapp-lite/releases).
+1. Baixe o `WhatsApp.Lite_1.1.0_x64-setup.exe` em [Releases](https://github.com/Igoxrx/whatsapp-lite/releases/latest).
 2. Abra o instalador. Ele não tem assinatura digital, então o Windows pode mostrar "O Windows protegeu o computador". Clique em **Mais informações** e depois em **Executar assim mesmo**.
 3. Abra o WhatsApp Lite e leia o QR code com o celular, como no WhatsApp Web.
 
