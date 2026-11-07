@@ -5,6 +5,18 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2026-11-07
+
+### Adicionado
+- Downloads abrem a janela "Salvar como", com opção no menu da bandeja para desligar
+- Arquivos arrastados para a janela vão para a conversa
+- Na bandeja, o app usa bem menos memória (cerca de 1,1 GB caem para 360 MB)
+
+### Corrigido
+- Conversa abria no topo em vez de na mensagem mais recente
+- Era preciso clicar na caixa de mensagem para começar a digitar
+- Na aba Status, não dava para voltar para Conversas
+
 ## [1.1.0] - 2026-11-07
 
 ### Adicionado

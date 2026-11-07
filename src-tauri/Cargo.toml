@@ -1,6 +1,6 @@
 [package]
 name = "whatsapp-lite"
-version = "1.1.0"
+version = "1.2.0"
 description = "WhatsApp Desktop ultra-leve em Rust - usa apenas 1MB de RAM vs 500MB+ do oficial"
 authors = ["Leonardo Matheus <https://github.com/leonardo-matheus>"]
 license = "MIT"
