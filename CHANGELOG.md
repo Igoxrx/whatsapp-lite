@@ -5,6 +5,28 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-11-07
+
+### Adicionado
+- Layout estilo celular: lista em tela cheia e conversa com botão de voltar
+- Barra de navegação embaixo em janelas com menos de 640 px
+- Chat compacto, com margens menores e balões mais largos
+- Segundo plano na bandeja do sistema, com opção para ligar ou desligar
+- Uma instância só: abrir de novo mostra a janela existente
+- Notificações de mensagens no Windows
+- Links abrem no navegador padrão (só http/https)
+- Botão voltar do mouse fecha a conversa
+- Esconde o aviso "Baixar o WhatsApp para Windows"
+
+### Corrigido
+- Scripts eram injetados antes de a página carregar e não rodavam
+- Regra de animações deixava a página 100% ocupada e atrasava as mensagens
+- Largura mínima de 748 px impedia o chat de encolher com a janela
+
+### Removido
+- Tamanho mínimo da janela (800×500)
+- Alça para redimensionar a lista de conversas, substituída pelo layout estilo celular
+
 ## [1.0.0] - 2026-01-17
 
 ### Adicionado

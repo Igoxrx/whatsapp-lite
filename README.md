@@ -1,193 +1,81 @@
 <p align="center">
-  <img src="src-tauri/icons/128x128.png" alt="WhatsApp Lite Logo" width="128" height="128">
+  <img src="src-tauri/icons/128x128.png" alt="WhatsApp Lite" width="96" height="96">
 </p>
 
-<h1 align="center">WhatsApp Lite Desktop</h1>
+<h1 align="center">WhatsApp Lite</h1>
 
 <p align="center">
-  <strong>🚀 Uma versão ultra-leve do WhatsApp Desktop feita em Rust</strong>
+  WhatsApp Web num app leve para Windows, feito com Tauri e Rust.
 </p>
 
-<p align="center">
-  <a href="#-o-problema">O Problema</a> •
-  <a href="#-a-solução">A Solução</a> •
-  <a href="#-comparação">Comparação</a> •
-  <a href="#-instalação">Instalação</a> •
-  <a href="#-desenvolvimento">Desenvolvimento</a> •
-  <a href="#-licença">Licença</a>
-</p>
+Fork do [WhatsApp Lite Desktop](https://github.com/leonardo-matheus/whatsapp-lite), de Leonardo Matheus, com layout estilo celular, bandeja do sistema, notificações e outras melhorias.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/RAM-~1MB-brightgreen?style=for-the-badge" alt="RAM Usage">
-  <img src="https://img.shields.io/badge/GPU-0%25-brightgreen?style=for-the-badge" alt="GPU Usage">
-  <img src="https://img.shields.io/badge/Rust-🦀-orange?style=for-the-badge" alt="Built with Rust">
-  <img src="https://img.shields.io/badge/Tauri-2.0-blue?style=for-the-badge" alt="Tauri 2.0">
-</p>
+O app abre o WhatsApp Web oficial no WebView2 do Windows, em vez de embutir um navegador inteiro como o WhatsApp Desktop baseado em Electron. Por isso o instalador tem menos de 1 MB.
 
----
+## O que tem
 
-## 😱 O Problema
+- **Layout estilo celular:** a lista de conversas ocupa a janela. Ao abrir uma conversa, só o chat aparece, com um botão de voltar.
+- **Barra embaixo em janelas estreitas:** abaixo de 640 px, os botões de Conversas, Status, Canais e Comunidades vão para o rodapé.
+- **Chat compacto:** margens menores e balões mais largos, e a janela pode ter qualquer tamanho.
+- **Segundo plano:** fechar a janela deixa o app no ícone perto do relógio, onde dá para ligar ou desligar essa opção.
+- **Notificações** de mensagens no Windows.
+- **Links** abrem no seu navegador padrão.
+- **Botão voltar do mouse** e a tecla Esc fecham a conversa.
+- **Aviso "Baixar o WhatsApp para Windows"** escondido.
+- **Uma instância só:** abrir o app de novo mostra a janela que já está rodando.
 
-Você já abriu o Gerenciador de Tarefas e viu isso?
+## Instalação
 
-```
-WhatsApp Desktop - 60% GPU (RTX 3060 Ti)
-WhatsApp Desktop - 500MB+ RAM
-```
+1. Baixe o `WhatsApp Lite_1.1.0_x64-setup.exe` em [Releases](https://github.com/Igoxrx/whatsapp-lite/releases).
+2. Abra o instalador. Ele não tem assinatura digital, então o Windows pode mostrar "O Windows protegeu o computador". Clique em **Mais informações** e depois em **Executar assim mesmo**.
+3. Abra o WhatsApp Lite e leia o QR code com o celular, como no WhatsApp Web.
 
-**Sério?** Uma aplicação de mensagens precisa de MAIS recursos que alguns jogos AAA?
+O app precisa do WebView2, que já vem no Windows 11. Se faltar, o instalador baixa.
 
-O WhatsApp Desktop oficial é construído com **Electron**, que basicamente roda um navegador Chrome inteiro só para exibir uma página web. Isso significa:
+## Bandeja do sistema
 
-- 🔥 **Alto consumo de GPU** - Até 60% em placas como RTX 3060 Ti
-- 💾 **500MB+ de RAM** - Para uma aplicação de chat!
-- 🔋 **Drena bateria** - Péssimo para notebooks
-- 🐌 **Startup lento** - Vários segundos para abrir
-- 📦 **Instalador pesado** - ~150MB de download
+Clique com o botão direito no ícone perto do relógio:
 
-## 💡 A Solução
+- **Abrir:** mostra a janela.
+- **Rodar em segundo plano:** marcado, o X só esconde a janela. Desmarcado, o X fecha o app.
+- **Sair:** fecha o app.
 
-**WhatsApp Lite Desktop** usa [Tauri](https://tauri.app/) + Rust para criar um wrapper nativo ultra-leve:
+A escolha fica salva em `%APPDATA%\com.whatsapp-lite.desktop\settings.json`.
 
-- ✅ Usa o **WebView nativo** do sistema (WebView2 no Windows)
-- ✅ **Zero overhead** de um navegador embutido
-- ✅ Backend em **Rust** = máxima eficiência
-- ✅ Remove **anúncios e banners** automaticamente
-- ✅ **Otimizações de GPU** desabilitando composição desnecessária
+## Compilar
 
-## 📊 Comparação
-
-| Métrica | WhatsApp Oficial | WhatsApp Lite | Economia |
-|---------|------------------|---------------|----------|
-| **RAM** | 500MB+ | ~1MB | **99.8%** ⬇️ |
-| **GPU** | 60%+ | ~0% | **99%** ⬇️ |
-| **Tamanho do instalador** | ~150MB | ~3MB | **98%** ⬇️ |
-| **Tempo de startup** | 5-10s | <1s | **90%** ⬇️ |
-| **Consumo de bateria** | Alto | Mínimo | **Significativo** ⬇️ |
-
-## 🚀 Instalação
-
-### Download Pré-compilado
-
-Baixe a última versão na página de [Releases](https://github.com/leonardo-matheus/whatsapp-desktop-fast/releases):
-
-- **Windows**: `WhatsApp-Lite_1.0.0_x64-setup.exe`
-- **macOS**: `WhatsApp-Lite_1.0.0_aarch64.dmg`
-- **Linux**: `whatsapp-lite_1.0.0_amd64.deb` ou `.AppImage`
-
-### Compilar do Código-Fonte
-
-#### Pré-requisitos
-
-- [Rust](https://rustup.rs/) 1.77+
-- [Node.js](https://nodejs.org/) 18+ (apenas para Tauri CLI)
-- **Windows**: WebView2 (já incluído no Windows 11)
-- **Linux**: `libwebkit2gtk-4.1`, `libgtk-3`
-- **macOS**: Xcode Command Line Tools
-
-#### Build
+Requisitos: [Rust](https://rustup.rs/) e [Node.js](https://nodejs.org/) (só para a CLI do Tauri).
 
 ```bash
-# Clone o repositório
-git clone https://github.com/leonardo-matheus/whatsapp-desktop-fast.git
-cd whatsapp-desktop-fast
-
-# Instale a CLI do Tauri
-cargo install tauri-cli
-
-# Build em modo release
-cd src-tauri
-cargo tauri build
+git clone https://github.com/Igoxrx/whatsapp-lite.git
+cd whatsapp-lite/src-tauri
+npx @tauri-apps/cli@2 build --bundles nsis
 ```
 
-O executável estará em `src-tauri/target/release/`.
+O instalador fica em `src-tauri/target/release/bundle/nsis/`, e o executável em `src-tauri/target/release/whatsapp-lite.exe`.
 
-## 🔧 Configuração
+Os ajustes de layout ficam em scripts injetados na página:
 
-### Proxy (Opcional)
+| Arquivo | O que faz |
+|---|---|
+| `src-tauri/mobile_layout.js` | Layout estilo celular, barra embaixo e botão de voltar |
+| `src-tauri/compact_chat.js` | Margens e largura das mensagens |
+| `src-tauri/remove_ad.js` | Esconde anúncios e o aviso de download |
 
-Se você precisa usar um proxy, defina a variável de ambiente antes de iniciar:
+O WhatsApp Web muda a página com frequência. Se algum ajuste parar de funcionar depois de uma atualização dele, é nesses arquivos que se corrige.
 
-```bash
-# Windows (PowerShell)
+## Proxy
+
+Para usar um proxy, defina a variável de ambiente antes de abrir o app:
+
+```powershell
 $env:WHATSAPP_PROXY = "http://seu-proxy:porta"
-
-# Linux/macOS
-export WHATSAPP_PROXY="http://seu-proxy:porta"
 ```
 
-## 🛠️ Desenvolvimento
+## Aviso
 
-```bash
-# Modo desenvolvimento com hot-reload
-cd src-tauri
-cargo tauri dev
-```
+Este é um cliente não oficial. Ele não tem ligação com o WhatsApp ou com a Meta e só carrega o WhatsApp Web oficial.
 
-### Estrutura do Projeto
+## Licença
 
-```
-whatsapp-desktop-fast/
-├── src-tauri/
-│   ├── src/
-│   │   └── main.rs          # Código principal Rust
-│   ├── remove_ad.js         # Script de remoção de anúncios
-│   ├── Cargo.toml           # Dependências Rust
-│   ├── tauri.conf.json      # Configuração do Tauri
-│   └── icons/               # Ícones da aplicação
-├── docs/
-│   └── index.html           # Landing page
-└── README.md
-```
-
-## 🤔 FAQ
-
-### É seguro?
-
-Sim! O aplicativo apenas carrega o WhatsApp Web oficial em um WebView nativo. Não há proxy de dados, não há modificação de mensagens. O código é 100% open source para você auditar.
-
-### Por que não simplesmente usar o navegador?
-
-Você pode! Mas ter uma aplicação dedicada oferece:
-- Ícone na bandeja do sistema
-- Notificações nativas
-- Janela separada do navegador
-- Menor consumo de recursos (vs uma aba do Chrome)
-
-### Funciona com múltiplas contas?
-
-Atualmente não. É uma feature planejada para versões futuras.
-
-### O WhatsApp pode me banir?
-
-Não. Este aplicativo usa o WhatsApp Web oficial, exatamente como seu navegador. Não há violação dos Termos de Serviço.
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Por favor:
-
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add: amazing feature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 🙏 Agradecimentos
-
-- [Tauri](https://tauri.app/) - Framework incrível para apps desktop
-- [Rust](https://www.rust-lang.org/) - Linguagem que torna isso possível
-- Comunidade open source
-
----
-
-<p align="center">
-  Feito com 🦀 e ☕ por <a href="https://github.com/leonardo-matheus">Leonardo Matheus</a>
-</p>
-
-<p align="center">
-  <sub>Se este projeto te ajudou, considere dar uma ⭐ no repositório!</sub>
-</p>
+MIT, como o projeto original. Veja [LICENSE](LICENSE).
