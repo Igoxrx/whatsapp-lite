@@ -63,7 +63,18 @@
             width: auto !important;
             max-width: none !important;
         }
-        html.wl-list [data-wl="main"] { display: none !important; }
+        /* com display: none o painel fica sem altura e a conversa abre no topo;
+           fica fora da tela porque partes dele continuam clicáveis */
+        html.wl-list [data-wl="main"] {
+            position: absolute !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 100% !important;
+            width: 100% !important;
+            max-width: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
 
         html.wl-chat [data-wl="nav"],
         html.wl-chat [data-wl="col"] { display: none !important; }
@@ -128,10 +139,24 @@
 
     function setMode(mode) {
         const root = document.documentElement;
+        const openingChat = mode === 'wl-chat' && !root.classList.contains('wl-chat');
         for (const m of ['wl-list', 'wl-chat']) {
             const on = m === mode;
             if (root.classList.contains(m) !== on) root.classList.toggle(m, on);
         }
+        if (openingChat) focusComposer();
+    }
+
+    // o WhatsApp tenta focar a caixa de mensagem enquanto o painel ainda está invisível
+    function focusComposer() {
+        requestAnimationFrame(() => {
+            const box = document.querySelector('#main footer [contenteditable="true"]');
+            if (box && !box.contains(document.activeElement)) box.focus();
+        });
+    }
+
+    function refreshSoon() {
+        setTimeout(refresh, 50);
     }
 
     function paneHasContent(pane) {
@@ -195,6 +220,7 @@
         createBackButton();
         window.addEventListener('mousedown', onMouseBack, true);
         window.addEventListener('mouseup', onMouseBack, true);
+        window.addEventListener('click', refreshSoon, true);
         refresh();
         timer = setInterval(refresh, 300);
     }
@@ -204,6 +230,7 @@
             clearInterval(timer);
             window.removeEventListener('mousedown', onMouseBack, true);
             window.removeEventListener('mouseup', onMouseBack, true);
+            window.removeEventListener('click', refreshSoon, true);
             setMode(null);
             document.querySelectorAll('[data-wl]').forEach(el => el.removeAttribute('data-wl'));
             [STYLE_ID, BACK_ID].forEach(id => {
