@@ -76,14 +76,28 @@
             pointer-events: none !important;
         }
 
-        html.wl-chat [data-wl="nav"],
-        html.wl-chat [data-wl="col"] { display: none !important; }
+        html.wl-chat [data-wl="nav"] { display: none !important; }
+        /* a lista só desenha as linhas que cabem nela; sem tamanho, para de atualizar */
+        html.wl-chat [data-wl="col"] {
+            position: absolute !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            right: 100% !important;
+            width: 400px !important;
+            max-width: none !important;
+            visibility: hidden !important;
+        }
         html.wl-chat [data-wl="main"] {
             flex: 1 1 auto !important;
             width: auto !important;
             max-width: none !important;
         }
         html.wl-chat [data-testid="conversation-header"] { padding-left: 52px !important; }
+        /* o WhatsApp centraliza o painel no botão de emoji, que aqui fica colado na borda */
+        html.wl-chat #expressions-panel-container > span > div {
+            left: 8px !important;
+            max-width: calc(100vw - 16px) !important;
+        }
 
         #${BACK_ID} {
             position: fixed;

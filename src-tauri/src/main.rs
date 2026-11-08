@@ -22,6 +22,7 @@ const DEFAULT_PROXY: Option<&str> = None;
 const AD_REMOVAL_SCRIPT: &str = include_str!("../remove_ad.js");
 const MOBILE_LAYOUT_SCRIPT: &str = include_str!("../mobile_layout.js");
 const COMPACT_CHAT_SCRIPT: &str = include_str!("../compact_chat.js");
+const MESSAGE_POPUP_SCRIPT: &str = include_str!("../message_popup.js");
 
 const WHATSAPP_ORIGIN: &str = "https://web.whatsapp.com/";
 
@@ -285,6 +286,7 @@ fn setup_main_window(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>>
         .initialization_script(AD_REMOVAL_SCRIPT)
         .initialization_script(MOBILE_LAYOUT_SCRIPT)
         .initialization_script(COMPACT_CHAT_SCRIPT)
+        .initialization_script(MESSAGE_POPUP_SCRIPT)
         .on_new_window(|url, _features| {
             open_in_browser(&url);
             NewWindowResponse::Deny
