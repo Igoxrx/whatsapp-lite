@@ -54,6 +54,7 @@
             rows.set(name.getAttribute('title'), {
                 row,
                 count: badge ? parseInt(badge.textContent, 10) || 1 : 0,
+                open: row.matches('[aria-selected="true"]') || !!row.querySelector('[aria-selected="true"]'),
             });
         }
         return rows;
@@ -63,11 +64,19 @@
         return document.documentElement.classList.contains('wl-chat') && document.hasFocus();
     }
 
+    function openChatName() {
+        const title = document.querySelector('#main [data-testid="conversation-info-header-chat-title"]');
+        return title ? title.textContent.trim() : null;
+    }
+
     function scan() {
         scanTimer = null;
         const rows = readRows();
         if (started && inConversation()) {
+            // a conversa aberta chega a ganhar o contador antes de ser marcada como lida
+            const openName = openChatName();
             for (const [name, info] of rows) {
+                if (info.open || name === openName) continue;
                 if (info.count > (counts.get(name) || 0)) {
                     show(name, info);
                     break;
@@ -81,7 +90,9 @@
     function show(name, info) {
         const popup = document.getElementById(POPUP_ID);
         if (!popup) return;
-        const preview = info.row.querySelector('[data-testid="last-msg-status"] span[title]');
+        const status = info.row.querySelector('[data-testid="last-msg-status"]');
+        const preview = status && (status.getAttribute('title')
+            || (status.querySelector('span[dir]') || {}).textContent);
         const avatar = info.row.querySelector('img');
 
         popup.replaceChildren();
@@ -97,7 +108,7 @@
         title.textContent = name;
         const body = document.createElement('div');
         body.className = 'wl-preview';
-        body.textContent = preview ? preview.getAttribute('title') : 'Nova mensagem';
+        body.textContent = preview || 'Nova mensagem';
         text.append(title, body);
         const close = document.createElement('button');
         close.className = 'wl-close';
