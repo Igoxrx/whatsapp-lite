@@ -5,6 +5,14 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-11-08
+
+### Adicionado
+- Aviso no topo quando chega mensagem de outra conversa enquanto você está numa conversa; clicar abre a conversa
+
+### Corrigido
+- Painel de figurinhas, GIFs e emojis ficava cortado no canto da tela
+
 ## [1.2.0] - 2026-11-07
 
 ### Adicionado
