@@ -25,6 +25,7 @@ O app abre o WhatsApp Web oficial no WebView2 do Windows, em vez de embutir um n
 - **Links** abrem no seu navegador padrão.
 - **Botão voltar do mouse** e a tecla Esc fecham a conversa.
 - **Aviso "Baixar o WhatsApp para Windows"** escondido.
+- **Atualização automática:** o app procura versões novas ao abrir e a cada 6 horas, e pergunta antes de instalar.
 - **Uma instância só:** abrir o app de novo mostra a janela que já está rodando.
 
 ## Instalação
@@ -42,6 +43,7 @@ Clique com o botão direito no ícone perto do relógio:
 - **Abrir:** mostra a janela.
 - **Rodar em segundo plano:** marcado, o X só esconde a janela. Desmarcado, o X fecha o app.
 - **Perguntar onde salvar downloads:** marcado, abre a janela "Salvar como". Desmarcado, os arquivos vão direto para a pasta Downloads.
+- **Procurar atualizações:** verifica na hora se saiu versão nova.
 - **Sair:** fecha o app.
 
 As escolhas ficam salvas em `%APPDATA%\com.whatsapp-lite.desktop\settings.json`.
@@ -68,6 +70,22 @@ Os ajustes de layout ficam em scripts injetados na página:
 | `src-tauri/remove_ad.js` | Esconde anúncios e o aviso de download |
 
 O WhatsApp Web muda a página com frequência. Se algum ajuste parar de funcionar depois de uma atualização dele, é nesses arquivos que se corrige.
+
+## Publicar uma versão nova
+
+As atualizações são assinadas com a chave em `%USERPROFILE%\.tauri\whatsapp-lite.key`. Guarde uma cópia dela: sem ela, quem já instalou não recebe mais atualizações automáticas.
+
+1. Aumente a versão em `src-tauri/tauri.conf.json` e `src-tauri/Cargo.toml`.
+2. Compile com a chave:
+
+   ```powershell
+   $env:TAURI_SIGNING_PRIVATE_KEY = "$env:USERPROFILE\.tauri\whatsapp-lite.key"
+   $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ""
+   npx @tauri-apps/cli@2 build --bundles nsis
+   ```
+
+3. Crie o `latest.json` com a versão, o conteúdo do `.sig` gerado e o link do instalador na Release.
+4. Na Release do GitHub, anexe o instalador e o `latest.json`.
 
 ## Proxy
 

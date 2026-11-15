@@ -7,6 +7,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [1.3.1] - 2026-11-15
 
+### Adicionado
+- Atualização automática: o app procura versões novas ao abrir, a cada 6 horas e pelo menu da bandeja
+
 ### Corrigido
 - Notificação do Windows aparecia com o app na frente; agora só aparece com ele em segundo plano
 - Ao abrir uma conversa, o aviso no topo aparecia para conversas que já tinham mensagens não lidas

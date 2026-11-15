@@ -7,10 +7,13 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
+use std::time::Duration;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::webview::{DownloadEvent, NewWindowResponse};
 use tauri::{AppHandle, Manager, Url, Webview, WebviewWindowBuilder, WindowEvent};
+use tauri_plugin_updater::UpdaterExt;
 
 struct Settings {
     run_in_background: AtomicBool,
@@ -205,6 +208,88 @@ fn set_in_tray(window: &tauri::WebviewWindow, in_tray: bool) {
     });
 }
 
+const UPDATE_INTERVAL: Duration = Duration::from_secs(6 * 60 * 60);
+
+// versão que o usuário recusou: a checagem automática não pergunta de novo
+static SKIPPED_VERSION: Mutex<Option<String>> = Mutex::new(None);
+
+async fn ask(title: &'static str, text: String, yes_no: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || {
+        let buttons = if yes_no {
+            rfd::MessageButtons::YesNo
+        } else {
+            rfd::MessageButtons::Ok
+        };
+        rfd::MessageDialog::new()
+            .set_title(title)
+            .set_description(text)
+            .set_buttons(buttons)
+            .show()
+            == rfd::MessageDialogResult::Yes
+    })
+    .await
+    .unwrap_or(false)
+}
+
+/// `manual`: pedido pelo menu da bandeja, então avisa também quando não há
+/// versão nova ou quando dá erro.
+async fn check_for_update(app: AppHandle, manual: bool) {
+    let result = match app.updater() {
+        Ok(updater) => updater.check().await,
+        Err(e) => Err(e),
+    };
+    let update = match result {
+        Ok(Some(update)) => update,
+        Ok(None) => {
+            if manual {
+                ask("WhatsApp Lite", "Você já está na versão mais recente.".into(), false).await;
+            }
+            return;
+        }
+        Err(e) => {
+            eprintln!("Erro ao procurar atualização: {}", e);
+            if manual {
+                let text = format!("Não deu para procurar atualizações agora.\n\n{}", e);
+                ask("WhatsApp Lite", text, false).await;
+            }
+            return;
+        }
+    };
+
+    if !manual && SKIPPED_VERSION.lock().unwrap().as_deref() == Some(update.version.as_str()) {
+        return;
+    }
+
+    let text = format!(
+        "A versão {} do WhatsApp Lite está disponível (você está na {}).\n\nAtualizar agora? O app fecha, instala e abre de novo.",
+        update.version, update.current_version
+    );
+    if !ask("Atualização disponível", text, true).await {
+        *SKIPPED_VERSION.lock().unwrap() = Some(update.version.clone());
+        return;
+    }
+
+    match update.download_and_install(|_, _| {}, || {}).await {
+        Ok(()) => app.restart(),
+        Err(e) => {
+            eprintln!("Erro ao instalar atualização: {}", e);
+            let text = format!("Não deu para instalar a atualização.\n\n{}", e);
+            ask("WhatsApp Lite", text, false).await;
+        }
+    }
+}
+
+fn schedule_update_checks(app: &tauri::App) {
+    let app = app.handle().clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_secs(10));
+        loop {
+            tauri::async_runtime::block_on(check_for_update(app.clone(), false));
+            std::thread::sleep(UPDATE_INTERVAL);
+        }
+    });
+}
+
 fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
     let settings = app.state::<Settings>();
 
@@ -225,8 +310,9 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
         settings.ask_download_path.load(Ordering::Relaxed),
         None::<&str>,
     )?;
+    let update = MenuItem::with_id(app, "update", "Procurar atualizações", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Sair", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &background, &ask_download, &quit])?;
+    let menu = Menu::with_items(app, &[&open, &background, &ask_download, &update, &quit])?;
 
     let mut tray = TrayIconBuilder::with_id("main")
         .tooltip("WhatsApp Lite")
@@ -236,6 +322,11 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
             // o clique já alternou o check
             let toggled = match event.id().as_ref() {
                 "open" => return show_main_window(app),
+                "update" => {
+                    let app = app.clone();
+                    tauri::async_runtime::spawn(check_for_update(app, true));
+                    return;
+                }
                 "quit" => return app.exit(0),
                 "background" => (&background, &app.state::<Settings>().run_in_background),
                 "ask_download" => (&ask_download, &app.state::<Settings>().ask_download_path),
@@ -328,6 +419,7 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             show_main_window(app);
         }))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             app.manage(load_settings(app.handle()));
 
@@ -336,6 +428,7 @@ fn main() {
                 e
             })?;
             setup_tray(app)?;
+            schedule_update_checks(app);
             Ok(())
         })
         .on_window_event(|window, event| {

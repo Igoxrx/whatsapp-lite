@@ -15,7 +15,11 @@
     "longDescription": "Uma alternativa leve ao WhatsApp Desktop oficial. Enquanto a versão Electron usa 500MB+ de RAM e até 60% da GPU, esta versão Rust/Tauri usa apenas ~1MB de RAM e praticamente zero GPU.",
     "linux": {
       "deb": {
-        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0", "libayatana-appindicator3-1"]
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libgtk-3-0",
+          "libayatana-appindicator3-1"
+        ]
       },
       "appimage": {
         "bundleMediaFramework": false
@@ -46,7 +50,8 @@
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
       }
-    }
+    },
+    "createUpdaterArtifacts": true
   },
   "app": {
     "security": {
@@ -65,5 +70,16 @@
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ0NDNBNEE4MzJGNjk5MjAKUldRZ21mWXlxS1JEUkM3eS9jME1zTjFybUJlOU5SUi84NDNWaTlSTVBZU1U0SS9tTUt2UVBySTUK",
+      "endpoints": [
+        "https://github.com/Igoxrx/whatsapp-lite/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
