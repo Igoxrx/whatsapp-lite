@@ -64,11 +64,13 @@ fn open_in_browser(url: &Url) {
 fn allow_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     use webview2_com::Microsoft::Web::WebView2::Win32::*;
     use webview2_com::{
-        take_pwstr, PermissionRequestedEventHandler, SetPermissionStateCompletedHandler,
+        take_pwstr, NotificationReceivedEventHandler, PermissionRequestedEventHandler,
+        SetPermissionStateCompletedHandler,
     };
     use windows::core::{w, Interface};
 
-    window.with_webview(|webview| unsafe {
+    let hwnd = window.hwnd()?.0 as isize;
+    window.with_webview(move |webview| unsafe {
         let Ok(core) = webview.controller().CoreWebView2() else {
             return;
         };
@@ -113,6 +115,23 @@ fn allow_notifications(window: &tauri::WebviewWindow) -> tauri::Result<()> {
         let mut token = 0;
         if let Err(e) = core.add_PermissionRequested(&handler, &mut token) {
             eprintln!("Erro ao configurar notificações: {}", e);
+        }
+
+        // Com a janela na frente o aviso fica dentro do app (lista ou popup),
+        // como no celular; o Windows só notifica com o app em segundo plano.
+        let received = NotificationReceivedEventHandler::create(Box::new(move |_, args| {
+            let Some(args) = args else { return Ok(()) };
+            let foreground = windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow();
+            if foreground.0 as isize == hwnd {
+                args.SetHandled(true)?;
+            }
+            Ok(())
+        }));
+        if let Ok(core) = core.cast::<ICoreWebView2_24>() {
+            let mut token = 0;
+            if let Err(e) = core.add_NotificationReceived(&received, &mut token) {
+                eprintln!("Erro ao configurar notificações: {}", e);
+            }
         }
     })
 }

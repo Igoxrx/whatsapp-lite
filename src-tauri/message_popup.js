@@ -54,6 +54,7 @@
             rows.set(name.getAttribute('title'), {
                 row,
                 count: badge ? parseInt(badge.textContent, 10) || 1 : 0,
+                time: (row.querySelector('[data-testid="chat-list-timestamp"]') || {}).textContent || '',
                 open: row.matches('[aria-selected="true"]') || !!row.querySelector('[aria-selected="true"]'),
             });
         }
@@ -69,6 +70,23 @@
         return title ? title.textContent.trim() : null;
     }
 
+    // horário da lista ("17:03") é do último minuto?
+    function justNow(time) {
+        const m = /(d{1,2}):(d{2})/.exec(time);
+        if (!m) return false;
+        const now = new Date();
+        const diff = now.getHours() * 60 + now.getMinutes() - (m[1] * 60 + +m[2]);
+        return diff === 0 || diff === 1;
+    }
+
+    // Abrir uma conversa muda a largura da lista e o WhatsApp redesenha as
+    // linhas: conversa que já tinha não lidas reaparece e parece nova.
+    function isNew(name, info) {
+        const known = counts.get(name);
+        if (known) return info.count > known.count;
+        return info.count > 0 && justNow(info.time);
+    }
+
     function scan() {
         scanTimer = null;
         const rows = readRows();
@@ -77,14 +95,14 @@
             const openName = openChatName();
             for (const [name, info] of rows) {
                 if (info.open || name === openName) continue;
-                if (info.count > (counts.get(name) || 0)) {
+                if (isNew(name, info)) {
                     show(name, info);
                     break;
                 }
             }
         }
         started = true;
-        counts = new Map([...rows].map(([name, info]) => [name, info.count]));
+        for (const [name, info] of rows) counts.set(name, { count: info.count, time: info.time });
     }
 
     function show(name, info) {
