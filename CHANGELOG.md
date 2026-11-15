@@ -5,6 +5,13 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.1] - 2026-11-15
+
+### Corrigido
+- Notificação do Windows aparecia com o app na frente; agora só aparece com ele em segundo plano
+- Ao abrir uma conversa, o aviso no topo aparecia para conversas que já tinham mensagens não lidas
+- O aviso no topo aparecia para a própria conversa aberta e não mostrava o texto da mensagem
+
 ## [1.3.0] - 2026-11-08
 
 ### Adicionado

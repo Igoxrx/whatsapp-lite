@@ -18,7 +18,7 @@ O app abre o WhatsApp Web oficial no WebView2 do Windows, em vez de embutir um n
 - **Barra embaixo em janelas estreitas:** abaixo de 640 px, os botões de Conversas, Status, Canais e Comunidades vão para o rodapé.
 - **Chat compacto:** margens menores e balões mais largos, e a janela pode ter qualquer tamanho.
 - **Segundo plano:** fechar a janela deixa o app no ícone perto do relógio, onde dá para ligar ou desligar essa opção. Na bandeja, o app usa bem menos memória (cerca de 360 MB, contra mais de 1 GB com a janela aberta).
-- **Notificações** de mensagens no Windows.
+- **Notificações** de mensagens no Windows quando o app está em segundo plano. Com a janela na frente, o aviso fica dentro do app.
 - **Aviso dentro da conversa:** se chegar mensagem de outra conversa enquanto você está numa, aparece um balão no topo, como no celular. Clicando nele, a conversa abre.
 - **Downloads com "Salvar como":** você escolhe a pasta e o nome do arquivo.
 - **Arrastar arquivos** para a conversa.
@@ -29,7 +29,7 @@ O app abre o WhatsApp Web oficial no WebView2 do Windows, em vez de embutir um n
 
 ## Instalação
 
-1. Baixe o `WhatsApp.Lite_1.3.0_x64-setup.exe` em [Releases](https://github.com/Igoxrx/whatsapp-lite/releases/latest).
+1. Baixe o `WhatsApp.Lite_1.3.1_x64-setup.exe` em [Releases](https://github.com/Igoxrx/whatsapp-lite/releases/latest).
 2. Abra o instalador. Ele não tem assinatura digital, então o Windows pode mostrar "O Windows protegeu o computador". Clique em **Mais informações** e depois em **Executar assim mesmo**.
 3. Abra o WhatsApp Lite e leia o QR code com o celular, como no WhatsApp Web.
 
